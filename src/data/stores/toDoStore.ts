@@ -1,4 +1,4 @@
-import create from 'zustand'
+import create, { State, StateCreator } from 'zustand'
 import { generateId } from '../helpers'
 
 interface Task {
@@ -13,20 +13,32 @@ interface ToDoStore {
     updateTask: (id: string, title: string) => void;
     removeTask: (id: string) => void;
 }
+function isToDoStore(object:any): object is ToDoStore {
+    return 'tasks' in object;
+}
 
-export const useToDoStore = create<ToDoStore>((set, get) => ({
-    tasks: [
-        {
-            id: '13',
-            title: 'Default Task',
-            createdAt: 40522,
-        },
-        {
-            id: '14',
-            title: 'Default Task 2',
-            createdAt: 50522,
+const localStorageUpdate = <T extends State>(config: StateCreator<T>):
+    StateCreator<T> => (set, get, api) => config((nextState, ...args) => {
+        if (isToDoStore(nextState)) {
+            window.localStorage.setItem('tasks', JSON.stringify(
+                nextState.tasks
+            ))
         }
-    ],
+        set(nextState, ...args);
+    }, get, api);
+
+    const getCurrentState = () => {
+        try {
+            const currentState = (JSON.parse(window.localStorage.getItem('tasks') || '[]')) as Task[];
+            return currentState;
+        } catch (err) {
+            window.localStorage.setItem('tasks', '[]');
+            return  [];
+        }
+    }
+
+export const useToDoStore = create<ToDoStore>(localStorageUpdate((set, get) => ({
+    tasks: getCurrentState(),
     createTask: (title) => {
         const { tasks } = get();
         const newTask = {
@@ -50,11 +62,14 @@ export const useToDoStore = create<ToDoStore>((set, get) => ({
     },
     removeTask: (id: string) => {
         const { tasks } = get();
-        if(confirm('Точно удалить?')) {
-            set({
-                tasks: tasks.filter((task) => task.id !== id)
-            });   
+        if (confirm('Точно удалить?')) {
+            setTimeout(() => {
+                set({
+                    tasks: tasks.filter((task) => task.id !== id)
+                });
+            }, 300);
+
         }
 
     },
-}))
+})))
