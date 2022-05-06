@@ -35,7 +35,7 @@ export const ShowTask: React.FC<ShowTaskProps> = ({
                     className={styles.showTaskCheckbox}
                     onChange={(evt) => {
                         setCheked(evt.target.checked);
-                        if (evt.target.checked) { onDone(id) }
+                        
                     }} />
                 {isEditMode ? (<input
                     value={value}
