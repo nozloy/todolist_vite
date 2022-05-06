@@ -50,7 +50,12 @@ export const ShowTask: React.FC<ShowTaskProps> = ({
                       }
                     }}
                     className={styles.showTaskTitleEdit}
-                />) : (<h3 className={styles.showTaskTitle}>{title}</h3>)}
+                />) : (<h3
+                className={styles.showTaskTitle}
+                onClick = {() => {
+                    setIsEditMode(true)
+                }}
+                >{title}</h3>)}
             </label>
             {isEditMode ? (<button
                 aria-label="Сохранить"
